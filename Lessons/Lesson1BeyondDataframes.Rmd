@@ -51,9 +51,31 @@ You already know the basics from your previous coursework. Here we will briefly 
 ```{r basics}
 ### Code chunk for demonstrating R basics during in-class discussion
 
-# put your code here as you follow along
-2+2
+2+2 
 ```
+
+Example below for improving code readability.
+
+```{r uglycode, warning=F, message=F, eval=F}
+# Poor formatting makes cord hard to read 
+library(tidyverse)
+realestate<-read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
+price_means<-rep(NA   ,1000);price_medians<-rep(NA   ,1000)
+for(b in 1:1000){`bootstrap sample`<-sample_n(realestate  ,nrow(realestate)  ,T)
+price_means[b]<-mean(`bootstrap sample`$price   )
+price_medians[b]<-median(`bootstrap sample`$price    )}
+quantile(price_means   ,c(0.025,0.975));quantile(price_medians   ,c(0.025,0.975));t.test(realestate$price)
+
+#-----------------------------------------
+### Can we fix bad code? Rebuilding for readability
+
+
+### Automated code parsing
+library(formatR)
+# formatR::tidy_app()
+
+```
+
 
 
 
