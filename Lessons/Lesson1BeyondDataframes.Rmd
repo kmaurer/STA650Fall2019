@@ -66,13 +66,35 @@ As we move through the next three four weeks of class, we will focus on challeng
 
 We will focus on two particularly helpful data structures:
 
-- Lists
 - Arrays
-
-#### Lists
-
-lists stuff
+- Lists
 
 #### Arrays
 
 Array stuff
+
+#### Lists
+
+A list is an *indexed* set of other R objects that can be *named*. These objects do not all need to be the same type. Lists can help us to bundle together vectors, matrices, data frames, arrays, or even other lists.  
+
+```{r list_example1}
+### Build a list with several different object types
+my_list <- list(
+  num_vec = c(1,2,3,4,5),
+  letters = LETTERS[1:10],
+  hi = "Hi Mom!",
+  my_df = data.frame(x=1:5,y=rnorm(5)),
+  my_array = array(data=1:12,dim=c(3,2,2))
+)
+str(my_list)
+
+# Demonstrate indexing
+
+
+# Demonstrate nested naming
+
+
+# Demonstrate practical uses
+```
+
+
