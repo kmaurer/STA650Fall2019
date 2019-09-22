@@ -31,13 +31,37 @@ Supplementary Resources for R Markdown:
 
 ### R Basics
 
+>``To understand computations in R, two slogans are helpful: Everything that exists is an object. Everything that happens is a function call.''
+  — John Chambers
+
 You already know the basics from your previous coursework. Here we will briefly discuss the following:
 
-- Objec
+- Objects
+  + Vectors, atomic types, attributes
+  + Data Frames
+  + Matrices
+- Functions
+  + Using existing functions
+  + Finding and reading help documentation
+- Documenting Code
+  + Naming objects, functions, variables
+  + Descriptive Comments
+  + Structural Organization
 
-```{r cars}
-summary(cars)
+```{r basics}
+### Code chunk for demonstrating R basics during in-class discussion
+
+# put your code here as you follow along
+2+2
 ```
+
+
+
+### Advanced Programming
+
+>``We are adventurers! We do not play on the playgrounds. We roam in the jungles!''
+  — Jie Li (Dr. Maurer's Grad Classmate)
+
 
 ## Including Plots
 
