@@ -1,0 +1,50 @@
+---
+title: "Beyond the Data Frame"
+author: "Karsten Maurer"
+date: "9/22/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Statistical Computing and Non-Parametric Methods
+
+In this module of STA650 -- Topics in Advanced Statistics -- we will be exploring the use of computing and non-parametric method in statistical practice. This will look like a set of general programming and computing topics and methods. This will require that we use a statistical programming language in sophisticated ways, and the module will specifically explore techniques for advanced programming in R. 
+
+I expect that you will follow along with the readings from the [Advanced R](https://adv-r.hadley.nz/) textbook by Hadley Wickham, attend and participate in class, and complete a few assignments to demonstrate your learning in this area. 
+
+We will spend a few minutes the first day talking about the [schedule of topics](https://docs.google.com/spreadsheets/d/1iE46coBqei20ML0fS3m-dPPWoNB8GNZm9MEM3bJs5EY/edit?usp=sharing) and the administrative details in the syllabus on the Canvas course website for this Module. 
+
+
+### Coding in R - Documenting with Rmarkdown
+
+This semester we will be coding and programming using the **R** language. We will be leveraging the benefits of the open source structure of R by using some of the excellent software packages developed by members of the R community. We will also be exploring the efficient data structures and functions available in Base R. We will be interacting with the R language using the **R Studio** Interactive Development Environment (IDE)
+
+We will be using **R Markdown** to document our work because it is capable of integrating the process of writing in both programming and natural languages. It is great to be able to transition back and forth between paragraphs expressing what we are trying to accomplish statistically  to the computational evidence to support our results.  I will be putting together an R Markdown document for each of our class periods to act as the notes for this module of the course.
+
+Supplementary Resources for R Markdown: 
+
+- [R Markdown Website](https://rmarkdown.rstudio.com/)
+- [R Markdown Reference Guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+
+### R Basics
+
+You already know the basics from your previous coursework. Here we will briefly discuss the following:
+
+- Objec
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
