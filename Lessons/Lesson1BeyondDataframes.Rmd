@@ -62,13 +62,17 @@ You already know the basics from your previous coursework. Here we will briefly 
 >``We are adventurers! We do not play on the playgrounds. We roam in the jungles!''
   — Jie Li (Dr. Maurer's Grad Classmate)
 
+As we move through the next three four weeks of class, we will focus on challenging our programming skills with methods that require heavier statistical computation than typically used in our other classes. For this we may need to use some more advanced types of objects in R, to use functions in more sophistocated ways and to build our own functions. Today we will focus on more advanced data objects than vectors and data frames. 
 
-## Including Plots
+We will focus on two particularly helpful data structures:
 
-You can also embed plots, for example:
+- Lists
+- Arrays
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+#### Lists
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+lists stuff
+
+#### Arrays
+
+Array stuff
