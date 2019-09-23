@@ -65,7 +65,7 @@ Example below for improving code readability.
 # Poor formatting makes cord hard to read 
 library(tidyverse)
 realestate<-read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
-price_means<-rep(NA   ,1000);price_medians<-rep(NA   ,1000)
+price_means<-rep(NA   ,1000);price_medians<-rep(NA, 1000)
 for(b in 1:1000){`bootstrap sample`<-sample_n(realestate  ,nrow(realestate)  ,T)
 price_means[b]<-mean(`bootstrap sample`$price   )
 price_medians[b]<-median(`bootstrap sample`$price    )}
@@ -73,11 +73,47 @@ quantile(price_means   ,c(0.025,0.975));quantile(price_medians   ,c(0.025,0.975)
 
 #-----------------------------------------
 ### Can we fix bad code? Rebuilding for readability
+#-----------------------------------------
+
+library(tidyverse)
+realestate <- read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
+
+# Initializing the storage space for the bootstrap means and medians
+price_means <- rep(NA, 1000)
+price_medians <- rep(NA, 1000)
+
+# Loop over 1000 repeated bootstrap samples, saving the means and medians
+for (b in 1:1000) {
+    bootstrap_sample <- sample_n(realestate, nrow(realestate), T)
+    price_means[b] <- mean(bootstrap_sample$price)
+    price_medians[b] <- median(bootstrap_sample$price)
+}
+
+# Calculate the quantiles of the collected means and medians
+quantile(price_means, c(0.025, 0.975))
+quantile(price_medians, c(0.025, 0.975))
+
+# Do these intervals match will with confidence intervals using central limit theorem? Compare interval to t-interval
+t.test(realestate$price)
+
 
 
 ### Automated code parsing
 library(formatR)
 # formatR::tidy_app()
+library(tidyverse)
+realestate <- read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
+price_means <- rep(NA, 1000)
+price_medians <- rep(NA, 1000)
+for (b in 1:1000) {
+    `bootstrap sample` <- sample_n(realestate, nrow(realestate), T)
+    price_means[b] <- mean(`bootstrap sample`$price)
+    price_medians[b] <- median(`bootstrap sample`$price)
+}
+quantile(price_means, c(0.025, 0.975))
+quantile(price_medians, c(0.025, 0.975))
+t.test(realestate$price)
+
 
 ```
 
@@ -141,7 +177,7 @@ Use an array to store the observation index in the first dimension, the means in
 
 ```{r simulation_array}
 N <- 100
-means <- c(-3,0,3)
+means <- c(-10,0,10)
 sds <- c(2,10)
 # initialize an empty array
 sim_data_array <- array(rep(NA,N*length(means)*length(sds)),
@@ -179,10 +215,13 @@ my_list <- list(
 str(my_list)
 
 # Demonstrate indexing
-
+my_list[[3]]
+my_list[[1]] *2
+my_list[[4]][ ,2]
 
 # Demonstrate nested naming
-
+my_list$hi
+my_list$my_df$y
 
 # Demonstrate practical uses
 ```
