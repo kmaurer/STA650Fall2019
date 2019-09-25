@@ -183,12 +183,26 @@ data(oliveoil)
 
 ### Start with a dataframe where I create the z-scores for palmitic acid, then add the rest 
 oo_standardized <- data.frame(
-  palmitic = (oliveoil[,"palmitic"]-mean(oliveoil[,"palmitic"]))/sd(oliveoil[,"palmitic"])
+  palmitic = (oliveoil[,"palmitic"]-mean(oliveoil[,"palmitic"]))/sd(oliveoil[,"palmitic"]),
+  palmitoleic = (oliveoil[,"palmitoleic"]-mean(oliveoil[,"palmitoleic"]))/sd(oliveoil[,"palmitoleic"]),
+  stearic = (oliveoil[,"stearic"]-mean(oliveoil[,"stearic"]))/sd(oliveoil[,"stearic"]),
+  oleic = (oliveoil[,"oleic"]-mean(oliveoil[,"oleic"]))/sd(oliveoil[,"oleic"]),
+  linoleic = (oliveoil[,"linoleic"]-mean(oliveoil[,"linoleic"]))/sd(oliveoil[,"linoleic"]),
+  linolenic = (oliveoil[,"linolenic"]-mean(oliveoil[,"linolenic"]))/sd(oliveoil[,"linolenic"]),
+  arachidic = (oliveoil[,"arachidic"]-mean(oliveoil[,"arachidic"]))/sd(oliveoil[,"arachidic"]),
+  eicosenoic = (oliveoil[,"eicosenoic"]-mean(oliveoil[,"eicosenoic"]))/sd(oliveoil[,"eicosenoic"])
 )
+head(oo_standardized)
 
 
-### Could I do this better with a function?
-
+### Could I do this better with a function? Yes
+stand_oo <- function(varname){
+  return((oliveoil[,varname]-mean(oliveoil[,varname]))/sd(oliveoil[,varname]))
+}
+# stand_oo("palmitic")
+# stand_oo(names(oliveoil)[3])
+alt_oo_standardized <- sapply(names(oliveoil)[3:10], function(x) stand_oo(x))
+head(alt_oo_standardized)
 
 ```
 
