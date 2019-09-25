@@ -1,0 +1,159 @@
+---
+title: "Day 1 (of Module 2)"
+author: "Dr. Karsten Maurer"
+date: "9/22/2019"
+output: 
+  html_document:
+    number_sections: true
+editor_options: 
+  chunk_output_type: console
+---
+
+# Beyond the Data Frame 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Statistical Computing and Non-Parametric Methods
+
+In this module of STA650 -- Topics in Advanced Statistics -- we will be exploring the use of computing and non-parametric method in statistical practice. This will look like a set of general programming and computing topics and methods. This will require that we use a statistical programming language in sophisticated ways, and the module will specifically explore techniques for advanced programming in R. 
+
+I expect that you will follow along with the readings from the [Advanced R](https://adv-r.hadley.nz/) textbook by Hadley Wickham, attend and participate in class, and complete a few assignments to demonstrate your learning in this area. 
+
+We will spend a few minutes the first day talking about the [schedule of topics](https://docs.google.com/spreadsheets/d/1iE46coBqei20ML0fS3m-dPPWoNB8GNZm9MEM3bJs5EY/edit?usp=sharing) and the administrative details in the syllabus on the Canvas course website for this Module. 
+
+
+### Coding in R - Documenting with Rmarkdown
+
+This semester we will be coding and programming using the **R** language. We will be leveraging the benefits of the open source structure of R by using some of the excellent software packages developed by members of the R community. We will also be exploring the efficient data structures and functions available in Base R. We will be interacting with the R language using the **R Studio** Interactive Development Environment (IDE)
+
+We will be using **R Markdown** to document our work because it is capable of integrating the process of writing in both programming and natural languages. It is great to be able to transition back and forth between paragraphs expressing what we are trying to accomplish statistically  to the computational evidence to support our results.  I will be putting together an R Markdown document for each of our class periods to act as the notes for this module of the course.
+
+Supplementary Resources for R Markdown: 
+
+- [R Markdown Website](https://rmarkdown.rstudio.com/)
+- [R Markdown Reference Guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+
+### R Basics
+
+>``To understand computations in R, two slogans are helpful: Everything that exists is an object. Everything that happens is a function call.''
+  — John Chambers
+
+You already know the basics from your previous coursework. Here we will briefly discuss the following:
+
+- Objects
+  + Vectors, atomic types, attributes
+  + Data Frames
+  + Matrices
+- Functions
+  + Using existing functions
+  + Finding and reading help documentation
+- Documenting Code
+  + Naming objects, functions, variables
+  + Descriptive Comments
+  + Structural Organization
+
+```{r basics}
+### Code chunk for demonstrating R basics during in-class discussion
+
+2+2 
+```
+
+Example below for improving code readability.
+
+```{r uglycode, warning=F, message=F, eval=F}
+# Poor formatting makes cord hard to read 
+library(tidyverse)
+realestate<-read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
+price_means<-rep(NA   ,1000);price_medians<-rep(NA   ,1000)
+for(b in 1:1000){`bootstrap sample`<-sample_n(realestate  ,nrow(realestate)  ,T)
+price_means[b]<-mean(`bootstrap sample`$price   )
+price_medians[b]<-median(`bootstrap sample`$price    )}
+quantile(price_means   ,c(0.025,0.975));quantile(price_medians   ,c(0.025,0.975));t.test(realestate$price)
+
+#-----------------------------------------
+### Can we fix bad code? Rebuilding for readability
+
+
+### Automated code parsing
+library(formatR)
+# formatR::tidy_app()
+
+```
+
+
+
+
+### Advanced Programming
+
+>``We are adventurers! We do not play on the playgrounds. We roam in the jungles!''
+  — Jie Li (Dr. Maurer's Grad Classmate)
+
+As we move through the next three four weeks of class, we will focus on challenging our programming skills with methods that require heavier statistical computation than typically used in our other classes. For this we may need to use some more advanced types of objects in R, to use functions in more sophistocated ways and to build our own functions. Today we will focus on more advanced data objects than vectors and data frames. 
+
+We will focus on two particularly helpful data structures:
+
+- Arrays
+- Lists
+
+#### Arrays
+
+An **Array** in R, is a vector for a  p-dimensional index set. This dimension attribute allows the vector to be searched and subsetted very efficiently. Technically we have already seen a 2-dimensional vector; an R matrix. Because an array is a special kind of vector, all values stored inside an array must be the same atomic type. 
+
+```{r matrix_example}
+### Show that matrix is a vector with dimension attributes
+# We can define matrix with the matrix() function
+my_matrix <- matrix(1:20, nrow=4, byrow=T)
+
+```
+
+Demonstrating Higher Dimensional Arrays:
+
+```{r array_example}
+# Build an array here
+```
+
+Why is this helpful? Suppose we are collecting the resulting values for simulating $n=100$ observations, from normals with means in $\{-3,0,3\}$ and Standard Deviations in $\{2,10\}$
+
+Use an array to store the observation index in the first dimension, the means in the second dimension, and standard deviations in the third dimension. Thus we create a 100 by 3 by 2 array to store the data. This allows us to easily access the data we want using the indexing. 
+
+```{r simulation_array}
+N <- 100
+means <- c(-3,0,3)
+sds <- c(2,10)
+# initialize an empty array
+sim_data_array <- array(rep(NA,N*length(means)*length(sds)),
+                        dim=c(N,length(means),length(sds)))
+
+# Save the 100 simulated values into the array with corresponding mean and sd positions
+set.seed(12345)
+for (j in 1:length(means)){
+  for (k in 1:length(sds)){
+    sim_data_array[ ,j, k] <- rnorm(N, mean = means[j], sd = sds[k])
+  }
+}
+
+# Explore at values from second mean and second sd N(0,10)
+
+```
+
+
+
+#### Lists
+
+A **list** in R is an *indexed* set of other R objects that can be *named*. These objects do not all need to be the same type. Lists can help us to bundle together vectors, matrices, data frames, arrays, or even other lists.  
+
+```{r list_example1}
+### Build a list with several different object types
+
+
+# Demonstrate indexing
+
+
+# Demonstrate nested naming
+
+
+# Demonstrate practical uses
+```
+
+

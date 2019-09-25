@@ -1,0 +1,98 @@
+---
+title: "Lesson 2 - Functions"
+author: "Karsten Maurer"
+date: "9/24/2019"
+output: html_document
+---
+---
+title: "Day 1 (of Module 2)"
+author: "Dr. Karsten Maurer"
+date: "9/22/2019"
+output: 
+  html_document:
+    number_sections: true
+editor_options: 
+  chunk_output_type: console
+---
+
+# Building Functions in R
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Overview
+
+Today in class we will discuss R functions. Functions are the engines that define how to DO things with your data objects in R. If data objects are the "nouns", then functions are the "verbs" of the R language. 
+
+Why build functions?
+
+1. Because it is fun (for us nerdy people).
+2. Because we find ourselves doing the same task multiple times throughout our code, and realize that each iteration is mostly the same process using slightly different values or variables. 
+3. Because we want to avoid copy/paste related errors.
+4. Because we want to make our code more readable.
+
+
+Today, we will discuss the basic structure and components of a function, how a function is created, passing parameters implicitly versus explicitly in a function call, name masking in nested environments, and infix operators.
+
+Below are links to supplementary resources about building functions in R: 
+
+- [Advanced R Functions Chapter](http://adv-r.had.co.nz/Functions.html)
+- [Additional Functions Reading from R for Data Science E-book](https://r4ds.had.co.nz/functions.html)
+
+### R Function Basics - Components
+
+>``To understand computations in R, two slogans are helpful: Everything that exists is an object. Everything that happens is a function call.''
+  — John Chambers
+
+Formals: The defined parameters of a function. Think of these as the set of data objects and options that can be defined by the programmer when a function is used.
+
+```{r formals, message=FALSE}
+### For these exercises we will consider the following functions:
+# mean from base R
+# ggplot from the ggplot2 package
+# `%>%` piping symbol from the dplyr package (infix operator)
+mean
+ggplot
+`%>%` 
+
+### What are the formals for these functions?
+# ?formals()
+
+
+```
+
+
+Body: The lines of code that will be run when the function is called. 
+
+```{r body, message=FALSE}
+### what is the body of each of the functions above?
+# body()
+
+
+```
+
+Environment: the environment from which the function will retreive named objects used execute the code from the body. When a function is called, a local namespace is created within the global environment. When code is run in this local environment, R has access to all objects contained in the global environment. The primary difference is that when the local namespace is create, the formal arguement names and their defined values are written into the local namespace. If these objects already exist in the global environment, they are overwritten locally while the function code is running. This is referred to as **name masking** After the function code has completed running, the local environment is deleted. Thus, the local environment of a function is both nested in the global environment and is temporary.
+
+```{r environments, message=FALSE}
+### what is the body of each of the functions above?
+# ?environment()
+
+
+```
+
+
+### Creating Functions
+
+
+
+
+### Calling a Function
+
+### name masking in nested environments, and infix operators.
+
+```{r list_example1}
+
+```
+
+
