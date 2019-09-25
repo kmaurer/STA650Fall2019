@@ -51,10 +51,10 @@ Formals: The defined parameters of a function. Think of these as the set of data
 ### For these exercises we will consider the following functions:
 # mean from base R
 # ggplot from the ggplot2 package
-# `%>%` piping symbol from the dplyr package (infix operator)
+# `%>%` piping symbol from the dplyr package 
 mean
 ggplot
-`%>%` 
+#`%>%`  # commented out to keep html file clean
 
 ### What are the formals for these functions?
 # ?formals()
@@ -72,7 +72,7 @@ Body: The lines of code that will be run when the function is called.
 
 ```
 
-Environment: the environment from which the function will retreive named objects used execute the code from the body. When a function is called, a local namespace is created within the global environment. When code is run in this local environment, R has access to all objects contained in the global environment. The primary difference is that when the local namespace is create, the formal arguement names and their defined values are written into the local namespace. If these objects already exist in the global environment, they are overwritten locally while the function code is running. This is referred to as **name masking** After the function code has completed running, the local environment is deleted. Thus, the local environment of a function is both nested in the global environment and is temporary.
+Environment: the environment from which the function will retrieve named objects used execute the code from the body. When a function is called, a local namespace is created within the global environment. When code is run in this local environment, R has access to all objects contained in the global environment. The primary difference is that when the local namespace is create, the formal argument names and their defined values are written into the local namespace. If these objects already exist in the global environment, they are overwritten locally while the function code is running. This is referred to as **name masking** After the function code has completed running, the local environment is deleted. Thus, the local environment of a function is both nested in the global environment and is temporary.
 
 ```{r environments, message=FALSE}
 ### what is the body of each of the functions above?
@@ -81,18 +81,114 @@ Environment: the environment from which the function will retreive named objects
 
 ```
 
-
 ### Creating Functions
 
+To create a function you must define the formals and body in using the  <tt>`function()`</tt> function, and assign the definition to a name. 
+
+```{r defining_functions, error=FALSE, }
+### In code this looks like 
+
+function_name <- function(formal_arguments_go_here) {
+  ### code body expression goes here
+}
+
+# Technically even the example above is a real function (albeit a boring one)
+formals(function_name)
+body(function_name)
+environment(function_name)
+
+# Also note, function() is a very weird function, since the body arguement goes outside the parentheses!
+
+### better example of simple function for adding up two numbers
+my_sum <- function(x, y, mischief=":P"){
+  if (!is.numeric(x) | !is.numeric(y)){
+    stop("x and y must be numeric")
+  } else if (mischief == "managed"){
+    val = x + y
+  } else {
+    val = x + y + sample(c(-1,0,1),
+                         size=1,
+                         prob = c(0.01,0.98,0.01))
+  }
+  return(val)
+}
 
 
+### Try it 100 times with sapply()
+sapply(1:100, function(x) my_sum(1,2))
+sapply(1:100, function(x) my_sum(1,2, mischief = "managed"))
+# sapply(1:100, function(x) my_sum("A",2, mischief = "managed"))
+```
 
 ### Calling a Function
 
-### name masking in nested environments, and infix operators.
+To call a function, you simply use its name and define any required formal arguments. Typically this is done within a set of parentheses directly following the function name. Only a few special cases break from that pattern. 
 
-```{r list_example1}
+What is more important to focus on is **if** and **how** we define the arguments. We may choose to define nothing in the arguments and the function might still work. 
+
+```{r null_args}
+no_arg <- function(){
+  x=10
+  return(x)
+}
+no_arg()
+# note, this function can't even accept arguements
+# no_arg(x=20)
+
+### typically these are made more flexible using dots ...
+no_arg2 <- function(...){
+  x=10
+  return(x)
+}
+# but still runs code that overwrites the value of x internally
+no_arg2()
+no_arg2(x=20)
+
+### Or we can set default values
+no_arg3 <- function(x=10){
+  return(x)
+}
+# This is the behavior we typically will want
+no_arg3()
+no_arg3(x=20)
+```
+
+The more important characteristics of function calls are related to how we define our arguments: implicitly and explicitly. If we rely on the default ordering of the arguements, then we are calling the arguments *implicitly*. If we refer to the argument by it's name while defining the values, then we are calling the arguement *explicitely*. Often we use a mix of these methods, but it is important to be aware of how and why we choose to define our arguments. 
+
+```{r arg_exp_imp}
+### all of the following are equivalent
+my_sum(x=1, y=2, mischief = "managed")
+my_sum(1, 2, "managed")
+my_sum(1, 2, mischief = "managed")
+my_sum(mischief = "managed", 1, 2)
+my_sum(y=2, 1, "managed")
+
+### the following is NOT equivalent
+# my_sum("managed",1,2)
 
 ```
 
+
+### Automating procedures
+
+The following example demonstrates code that would be better served by constructing a function to accomplish the task.
+
+```{r example_change_to_functions}
+
+### I want to take the following olive oil data and standarize the columns
+# install.packages("pdfCluster")
+library(pdfCluster)
+data(oliveoil)
+# ? oliveoil
+
+### Start with a dataframe where I create the z-scores for palmitic acid, then add the rest 
+oo_standardized <- data.frame(
+  palmitic = (oliveoil[,"palmitic"]-mean(oliveoil[,"palmitic"]))/sd(oliveoil[,"palmitic"])
+)
+
+
+### Could I do this better with a function?
+
+
+```
 
