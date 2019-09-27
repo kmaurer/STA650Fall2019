@@ -110,30 +110,26 @@ rbeta(5,shape1=1,shape2=1)
 param_combinations <- expand.grid(shape1=seq(0.5,5,by=.5),
                                   shape2=seq(0.5,5,by=.5))
 str(param_combinations)
-set.seed(12345)
-my_beta_sims <- mapply(rbeta, 
-       shape1=param_combinations$shape1,
-       shape2=param_combinations$shape2,
-       MoreArgs=list(n=5),
-       SIMPLIFY = "array")
-# rows in parameter storage correspond to the columns in the simulation array
-param_combinations[1:10,]
-my_beta_sims[,1:10]
 
-# Could turn this into an 3-dimensional array where the index
+# my_beta_sims <- mapply()
+
+
+
+
+## rows in parameter storage correspond to the columns in the simulation array
+# param_combinations[1:10,]
+# my_beta_sims[,1:10]
+
+## Could turn this into an 3-dimensional array where the index
 # [i,j,k] represent the [i-th simulation, j-th shape1, k-th shape2] 
-dim(my_beta_sims) <- c(5,10,10)
-my_beta_sims[ , , 1]
 
 
-### Now suppose I want the mean for the simulation outcomes array
-mean(my_beta_sims[ ,1 , 1])
 
-beta_means <- apply(X = my_beta_sims,
-      MARGIN = c(2,3),
-      FUN=mean)
-str(beta_means)
+### Now, suppose I want the mean for the simulation outcomes array
 
+
+
+#---------------------------------------------------------------------------------------
 ### We could now check our simulated means against a theoretical mean
 theoretical_beta_mean <- function(alpha, beta){
   alpha / (alpha + beta)
@@ -148,7 +144,7 @@ theoretical_beta_mean <- function(alpha, beta){
 ```
 
 
-## Modularity of Code
+## Writing Modular Functions
 
 When you are writing functions to do a complex task, try to identify the system of simple tasks that are needed to accomplish it step-by-step. For example we might consider building functions to help us to automate the process of running stepwise selection based on AIC, then outputting a model object that we can use for prediction, or inference. 
 
