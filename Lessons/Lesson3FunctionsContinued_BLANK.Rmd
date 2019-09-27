@@ -1,0 +1,94 @@
+---
+title: "Lesson 3 Functions Continued"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=2"
+    ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# Functions Continued
+
+Today in class we will continue our discussion about building and using functions. We will look back to the example from the end of class on Wednesday to demonstrate the use of iterative function calling with `for()` loops, `apply()` family functions, and `map()` family functions from the `purrr` package. We will also discuss the idea of functional modularization while creating functions that do complex tasks. 
+
+## Automating procedures 
+
+The following example demonstrates code that would be better served by constructing a function to accomplish the task.
+
+```{r example_change_to_functions}
+
+### I want to take the following olive oil data and standarize the columns
+# install.packages("pdfCluster")
+library(pdfCluster)
+data(oliveoil)
+# ? oliveoil
+names(oliveoil)
+
+#----------------------------------------------------------------
+### Start with a dataframe where I create the z-scores for palmitic acid, then add the rest 
+oo_standardized <- data.frame(
+  palmitic = (oliveoil[,"palmitic"]-mean(oliveoil[,"palmitic"]))/sd(oliveoil[,"palmitic"]),
+  palmitoleic = (oliveoil[,"palmitoleic"]-mean(oliveoil[,"palmitoleic"]))/sd(oliveoil[,"palmitoleic"]),
+  stearic = (oliveoil[,"stearic"]-mean(oliveoil[,"stearic"]))/sd(oliveoil[,"stearic"]),
+  oleic = (oliveoil[,"oleic"]-mean(oliveoil[,"oleic"]))/sd(oliveoil[,"oleic"]),
+  linoleic = (oliveoil[,"linoleic"]-mean(oliveoil[,"linolenic"]))/sd(oliveoil[,"linoleic"]),
+  linolenic = (oliveoil[,"linolenic"]-mean(oliveoil[,"linolenic"]))/sd(oliveoil[,"linolenic"]),
+  arachidic = (oliveoil[,"arachidic"]-mean(oliveoil[,"arachidic"]))/sd(oliveoil[,"arachidic"]),
+  eicosenoic = (oliveoil[,"eicosenoic"]-mean(oliveoil[,"eicosenoic"]))/sd(oliveoil[,"eicosenoic"])
+)
+head(oo_standardized)
+
+### Could I do this better with a function? Yes (and No)
+
+# function specific to oliveoil data frame
+oo_stand <- function(varname){
+  (oliveoil[,varname]-mean(oliveoil[,varname]))/sd(oliveoil[,varname])
+}
+
+# building the standardized data almost as repetative as previous approach
+oo_standardized2 <- data.frame(
+  palmitic =  oo_stand("palmitic"),
+  palmitoleic =  oo_stand("palmitoleic"),
+  stearic =  oo_stand("stearic"),
+  oleic =  oo_stand("oleic"),
+  linoleic =  oo_stand("linoleic"),
+  linolenic =  oo_stand("linolenic"),
+  arachidic =  oo_stand("arachidic"),
+  eicosenoic =  oo_stand("eicosenoic")
+)
+head(oo_standardized2)
+
+#----------------------------------------------------------------
+### Could do this iteratively with for-loops
+
+
+
+#----------------------------------------------------------------
+### Could also do this with APPLY type statements
+# apply() used to apply functions over the indeces of an array 
+# lapply() used to apply functions over the values in a list, outputs to a list
+# sapply() used to apply functions over the values in a list, outputs to a simplified array 
+# vapply() used to apply functions over the values in a list, outputs to sepecified object type
+# mapply() used to apply functions over the corresponding values in multiple lists
+
+# Karsten's Personal Use (with orders of magnitude >):
+# sapply > lapply >> mapply >>>>> vapply > apply
+
+
+
+#----------------------------------------------------------------
+### Could also do this with map functions from purrr package
+library(purrr)
+# http://purrr.tidyverse.org 
+# help(package="purrr")
+
+
+```
+
+

@@ -5,6 +5,10 @@ date: "9/25/2019"
 output: 
   html_document:
     number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=1"
+    ]
 editor_options: 
   chunk_output_type: console
 ---
@@ -79,11 +83,11 @@ ls()
 x <- 1:5
 ls()
 x*2
-head(iris)
+
 rm(x)
 
-mean(1:5)
-x
+
+
 ```
 
 ### Creating Functions
@@ -157,7 +161,7 @@ no_arg3(x=20)
 The more important characteristics of function calls are related to how we define our arguments: implicitly and explicitly. If we rely on the default ordering of the arguements, then we are calling the arguments *implicitly*. If we refer to the argument by it's name while defining the values, then we are calling the arguement *explicitely*. Often we use a mix of these methods, but it is important to be aware of how and why we choose to define our arguments. 
 
 ```{r arg_exp_imp}
-mean(T,1:5)
+mean(1:5,na.rm=T)
 formals(mean)
 ### all of the following are equivalent
 my_sum(2,3,T)
@@ -194,7 +198,7 @@ head(oo_standardized)
 oo_stand <- function(varname){
   (oliveoil[,varname]-mean(oliveoil[,varname]))/sd(oliveoil[,varname])
 }
-sapply(names(oliveoil)[3:10], function(x) oo_stand(varname=x))
+# sapply(names(oliveoil)[3:10], function(x) oo_stand(varname=x))
 
 
 ```
