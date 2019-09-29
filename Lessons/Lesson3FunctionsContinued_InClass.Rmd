@@ -4,11 +4,12 @@ author: "Karsten Maurer"
 date: "9/27/2019"
 output: 
   html_document:
+
     number_sections: true
     pandoc_args: [
       "--number-sections",
       "--number-offset=2"
-    ]
+      ]
 editor_options: 
   chunk_output_type: console
 ---
