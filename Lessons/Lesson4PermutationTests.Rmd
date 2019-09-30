@@ -83,7 +83,7 @@ perm_sleep_diffs <- apply(sleep_sets, 2, sleep_diff)
 # Critical values in test
 quantile(perm_sleep_diffs,c(0.025,.975))
 
-# permutation test p-value
+# permutation test p-values
 mean(abs(perm_sleep_diffs) >= abs(sleep_diff(1:10)))
 ```
 
