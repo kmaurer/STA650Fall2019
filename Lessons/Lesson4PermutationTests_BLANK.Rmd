@@ -35,8 +35,6 @@ Consider the simple case where we have 50 people randomly assigned to two differ
 
 Parametric (typical approach): --- fill in the answer here --- 
 
-1. Use CLT and assumption of independence to build a t-test for the difference n means
-2. Check p-value as the area in the upper tail of the known distribution of the test statistic 
 
 Permutation Testing:
 
@@ -66,25 +64,16 @@ A data frame with 20 observations on 3 variables.
 First, let's see if we can exhaustively serve possible permutations
 ```{r sleep_perm}
 sleep
+# number of possible permutations?
 choose(20,10)
 
-sleep_sets <- combn(1:20, 10,simplify = TRUE)
-dim(sleep_sets)
-sleep_sets[,1:5]
+### Use combn function from utils package to define matrix of all sets of indeces 
+# ?combn
+
 
 # need a function that can take a vector of indeces, and return the average difference in sleep in the two groups
 
-sleep_diff <- function(idx){
-  with(sleep, mean(extra[idx])-mean(extra[-idx]))
-}
 
-perm_sleep_diffs <- apply(sleep_sets, 2, sleep_diff)
-
-# Critical values in test
-quantile(perm_sleep_diffs,c(0.025,.975))
-
-# permutation test p-value
-mean(abs(perm_sleep_diffs) >= abs(sleep_diff(1:10)))
 ```
 
 ### Monte Carlo Simulated Permutation Test Example:
@@ -100,27 +89,12 @@ head(real_estate)
 table(real_estate$pool)
 
 # Difference in 90th percentiles?
-q90diff <- with(real_estate, quantile(price[pool=="yes"],.9)-quantile(price[pool=="no"],.9))
+
 
 #Make a function that randomly permutes the pool labels then compares quantiles
-perm_pool <- function(df){
-  df$pool <- df$pool[sample(1:length(df$pool),length(df$pool))]
-  with(df, quantile(price[pool=="yes"],.9)-quantile(price[pool=="no"],.9))
-}
-perm_pool(real_estate)
 
-# Outcome is random, run it through 10000 MC simulations, could use for loop or rapply()
-M=25000
 
-timer <- Sys.time()
-perm_diffs <- rep(NA,M)
-for(i in 1:M){
-  perm_diffs[i] <- perm_pool(real_estate)
-}
-Sys.time() - timer 
-
-# MC permuation p-value
-mean(abs(perm_diffs) >= abs(q90diff))
+# Outcome is random, run it through 10000 MC simulations\
 ```
 
 
