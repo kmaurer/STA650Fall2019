@@ -1,5 +1,5 @@
 ---
-title: "Lesson 4 Randomization Based Testing"
+title: "Lesson 4 Randomization-Based Testing"
 author: "Karsten Maurer"
 date: "9/27/2019"
 output: 
@@ -13,7 +13,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Permutation Testing
+# Randomization and Permutation Testing
 
 ## Fisher's Exact Test
 
@@ -32,7 +32,10 @@ But how well does this generalize to non-binary outcome? Do the theoretically pr
 
 Consider the simple case where we have 50 people randomly assigned to two different drug groups and we want to test if the average blood pressure from Drug 1 is *higher* the average from Drug 2. We will have data with blood pressures $Y_{ij}$ for person $i \in {1,2,...,50}$ for drug $j \in {1,2}$. If the difference in means was $\bar{Y_1} - \bar{Y_2}=20$ mmHG how would we determine a p-value?
 
-Parametric (typical approach): --- fill in the answer here --- 
+Parametric (typical approach): 
+
+Run a t-test with the two samples to compare the means. Must assume: Y is numeric, $\bar{Y}$ is Normal by CLT. 
+
 
 
 Permutation Testing:
@@ -66,12 +69,40 @@ sleep
 # number of possible permutations?
 choose(20,10)
 
-### Use combn function from utils package to define matrix of all sets of indeces 
+### Use combn function from utils package to define matrix of all sets of indeces
 # ?combn
+sleep_sets <- combn(1:20, m=10)
+dim(sleep_sets)
+# first few columns
+sleep_sets[ , 1:3]
+# 100000th column
+sleep_sets[ , 100000]
 
+# could calculate the difference in sleep averages
+with(sleep, mean(extra[group==1]) - mean(extra[group==2]))
+with(sleep, mean(extra[1:10]) - mean(extra[-(1:10)]))
 
 # need a function that can take a vector of indeces, and return the average difference in sleep in the two groups
+sleep_compare <- function(idx_vec){
+  with(sleep, mean(extra[idx_vec]) - mean(extra[-idx_vec]))
+}
 
+# Calculate the difference in sleep averages for all permuations
+perm_diffs <- apply(X=sleep_sets, MARGIN = 2, sleep_compare)
+
+# how are the permuted difference distributed?
+# histogram is centered at 0 and symmetric
+hist(perm_diffs)
+# quantiles show same shape
+quantile(perm_diffs, seq(.1,.975,by=.05))
+
+# calculate a p-value for Hypothesis Test for difference in mean
+# one tail 
+real_diff <- with(sleep, mean(extra[group==1]) - mean(extra[group==2]))
+mean(perm_diffs <= real_diff)
+
+# two tail
+mean(abs(perm_diffs) >= abs(real_diff))
 
 ```
 
@@ -88,12 +119,31 @@ head(real_estate)
 table(real_estate$pool)
 
 # Difference in 90th percentiles?
-
+quantile(real_estate$price, .9)
+with(real_estate, quantile(price[pool=="yes"], .9))
+with(real_estate, quantile(price[pool=="no"], .9))
+with(real_estate, quantile(price[pool=="yes"], .9)-quantile(price[pool=="no"], .9))
 
 #Make a function that randomly permutes the pool labels then compares quantiles
+compare_highend_perm <- function(df){
+  df$pool <- sample(df$pool, size=length(df$pool))
+  with(df, quantile(price[pool=="yes"], .9)-quantile(price[pool=="no"], .9))
+}
 
+# Outcome is random, run it through 10000 MC simulations
+M <- 10000
+pool_diffs <- rep(NA,M)
+for( i in 1:M){
+  pool_diffs[i] <- compare_highend_perm(real_estate)
+}
+head(pool_diffs)
 
-# Outcome is random, run it through 10000 MC simulations\
+# alternatively could use sapply
+pool_diffs2 <- sapply(1:M, function(x) compare_highend_perm(real_estate) )
+
+# p-value for test of difference in 90th percentile prices for homes with and without pools
+real_diff <- with(real_estate, quantile(price[pool=="yes"], .9)-quantile(price[pool=="no"], .9))
+mean(pool_diffs >= real_diff)
 ```
 
 
