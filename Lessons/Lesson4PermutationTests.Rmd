@@ -87,17 +87,38 @@ mean(abs(perm_sleep_diffs) >= abs(sleep_diff(1:10)))
 
 ### Monte Carlo Simulated Permutation Test Example:
 
-Use bigger data set where exhaustive permutation would be prohibitive. Try testing if the price of a high end home (at the 80th percentile) is higher for homes with or without swimming pools. Use the Ames homes data
+Use bigger data set where exhaustive permutation would be prohibitive. Try testing if the price of a high end home (at the 90th percentile) is higher for homes with or without swimming pools. Use the Ames homes data
 
 ```{r}
-library(tidyverse)
+# load the real estate data
 real_estate <- read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
 
+#Check out the data
 head(real_estate)
-
 table(real_estate$pool)
 
+# Difference in 90th percentiles?
+q90diff <- with(real_estate, quantile(price[pool=="yes"],.9)-quantile(price[pool=="no"],.9))
 
+#Make a function that randomly permutes the pool labels then compares quantiles
+perm_pool <- function(df){
+  df$pool <- df$pool[sample(1:length(df$pool),length(df$pool))]
+  with(df, quantile(price[pool=="yes"],.9)-quantile(price[pool=="no"],.9))
+}
+perm_pool(real_estate)
+
+# Outcome is random, run it through 10000 MC simulations, could use for loop or rapply()
+M=25000
+
+timer <- Sys.time()
+perm_diffs <- rep(NA,M)
+for(i in 1:M){
+  perm_diffs[i] <- perm_pool(real_estate)
+}
+Sys.time() - timer 
+
+# MC permuation p-value
+mean(abs(perm_diffs) >= abs(q90diff))
 ```
 
 
