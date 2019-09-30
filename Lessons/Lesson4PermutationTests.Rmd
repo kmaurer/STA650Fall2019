@@ -18,12 +18,12 @@ editor_options:
 
 ## Fisher's Exact Test
 
-The idea of permutation testing grows out of Fisher's Exact test; part of the experimental design work by R.A. Fisher at Rothemstad in the 1920's. The canonical example of Fisher's exact test is the "Lady Tasting Tea" experiment. As the story goes, Muriel Bristol was a lady who worked with Fisher at Rothemstad. She claimed to be able to tell if a cup of tea was made with milk first then tea added, or tea first then milk added. Fisher was suspicious and devised an experiment to test her skills. 8 cups of tea were made: 4 milk first, 4 tea first. The eight cups were randomized in order, an Muriel was asked to sort them through a blinded taste test. If she was guessing, then the number of correct guesses would follow a Hypergeometric distribution. (Contemperanious accounts say that she got all 8 correct -- thus a pvalue = `r dhyper(4,4,4,4)`) 
+The idea of permutation testing grows out of Fisher's Exact test; part of the experimental design work by R.A. Fisher at Rothemstad in the 1920's. The canonical example of Fisher's exact test is the "Lady Tasting Tea" experiment. As the story goes, Muriel Bristol was a lady who worked with Fisher at Rothemstad. She claimed to be able to tell if a cup of tea was made with milk first then tea added, or tea first then milk added. Fisher was suspicious and devised an experiment to test her skills. 8 cups of tea were made: 4 milk first, 4 tea first. The eight cups were randomized in order, an Muriel was asked to sort them through a blinded taste test. If she was guessing, then the number of correct guesses would follow a Hypergeometric distribution. (Contemporaneous accounts say that she got all 8 correct -- thus a pvalue = `r dhyper(4,4,4,4)`) 
 
 In other words, if the null hypothesis is true, then the number of correct guesses would be a known distribution. The hypergeometric is effectively a combinatoric problem, looking through the number of possible ways to see a certain set of outcomes out of the number of possible ways total.  
 
 $p(x) =  {m\choose x} {n\choose k-x} /  {m+n\choose k}$ 
-Where $m$ is the number of cups of milk first, $n$ is the number of cups of tea first, and $k$ is the number of cups for quessing "tea first". For the 8 cups, this would mean that there was only one way to guess them all correctly out of the ${(4+4)\choose 4}$=`r choose(8,4)` possible ways to guess 4 cups.
+Where $m$ is the number of cups of milk first, $n$ is the number of cups of tea first, and $k$ is the number of cups for guessing "tea first". For the 8 cups, this would mean that there was only one way to guess them all correctly out of the ${(4+4)\choose 4}$=`r choose(8,4)` possible ways to guess 4 cups.
 
 ![Tea Kettle and Cup](https://upload.wikimedia.org/wikipedia/commons/3/37/Nice_Cup_of_Tea.jpg)
 
@@ -38,19 +38,75 @@ Parametric (typical approach): --- fill in the answer here ---
 1. Use CLT and assumption of independence to build a t-test for the difference n means
 2. Check p-value as the area in the upper tail of the known distribution of the test statistic 
 
-Exhaustive Permutation Testing:
+Permutation Testing:
 
-1. Figure out what should happen if the NULL of no difference is true. The difference in blood pressure averages of 20 mmHg occured by random chance due to the random assignment of 50 people to each group. 
+1. Figure out what should happen if the NULL of no difference is true. The difference in blood pressure averages of 20 mmHg occurred by random chance due to the random assignment of 50 people to each group. 
 2. How many possible outcomes were there? ${100\choose 50}$=`r choose(100,50)`
 3. Yikes, that is a lot of possible outcomes! How many would lead to an outcome that is as extreme or more extreme than we observed (difference $\ge$ 20 mmHg)?
 Unknown, so we just need to compute for all `r choose(100,50)` combinations of people...
 
 
+Monte Carlo Testing:
 
-Random Permutation Testing:
+1. Figure out what should happen if the NULL of no difference is true. The difference in blood pressure averages of 20 mmHg occurred by random chance due to the random assignment of 50 people to each group. 
+2. How many would lead to an outcome that is as extreme or more extreme than we observed (difference $\ge$ 20 mmHg)? Simulate the random assignment of people to treatments by permuting the drug labels in your data set. Record the difference in averages. Then repeat this process a reasonable number of times. Perhaps M=10000 times. Calculate the p-value as the number of random permutations out of your trials where the average difference exceeded 20 mmHg.
 
-1. Figure out what should happen if the NULL of no difference is true. The difference in blood pressure averages of 20 mmHg occured by random chance due to the random assignment of 50 people to each group. 
-2. How many would lead to an outcome that is as extreme or more extreme than we observed (difference $\ge$ 20 mmHg)? Simulate the random assignment of people to treatments by permuting the drug labels in your dataset. Record the difference in averages. Then repeat this process a reasonable number of times. Perhaps M=10000 times. Calculate the p-value as the number of random permuations out of your trials where the average difference exceeded 20 mmHg.
+### Permutation Test Example:
+
+Using data from the student sleep data. The following is directly taken from the help file for the sleep data in Base R:
+
+A data frame with 20 observations on 3 variables.
+
+[, 1]	extra	numeric	increase in hours of sleep
+
+[, 2]	group	factor	drug given
+
+[, 3]	ID	factor	patient ID
+
+First, let's see if we can exhaustively serve possible permutations
+```{r sleep_perm}
+sleep
+choose(20,10)
+
+sleep_sets <- combn(1:20, 10,simplify = TRUE)
+dim(sleep_sets)
+sleep_sets[,1:5]
+
+# need a function that can take a vector of indeces, and return the average difference in sleep in the two groups
+
+sleep_diff <- function(idx){
+  with(sleep, mean(extra[idx])-mean(extra[-idx]))
+}
+
+perm_sleep_diffs <- apply(sleep_sets, 2, sleep_diff)
+
+quantile(perm_sleep_diffs,c(0.025,.975))
+
+mean(abs(perm_sleep_diffs) >= abs(sleep_diff(1:10)))
+```
+
+### Monte Carlo Simulated Permutation Test Example:
+
+Use bigger data set where exhaustive permutation would be prohibitive. Try testing if the price of a high end home (at the 80th percentile) is higher for homes with or without swimming pools. Use the Ames homes data
+
+```{r}
+library(tidyverse)
+real_estate <- read.csv("http://kmaurer.github.io/documents/data/realestate.csv")
+
+head(real_estate)
+
+table(real_estate$pool)
+
+
+```
+
+
+
+
+
+
+
+
 
 
 
