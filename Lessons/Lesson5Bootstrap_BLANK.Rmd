@@ -31,45 +31,9 @@ So suppose you have a summary statistic that doesn't have a known sampling distr
 
 ```{r bootstrap_samples, warning=FALSE}
 # Lets explore what a bootstrap sample looks like:
-
 simple_data <- data.frame(row=1:5,value=c(7,6,9,12,11))
 simple_data
 
-# Sample with replacement
-boot_idx <- sample(1:5, replace=T)
-boot_idx
-simple_data[boot_idx, ]
-# each time we get different bootstrap samples
-simple_data[sample(1:5, replace=T), ]
-simple_data[sample(1:5, replace=T), ]
-
-
-
-# Less Simple data
-library(pdfCluster)
-data("oliveoil")
-
-# What is interesting about olive oils?
-# Perhaps we want to conduct a principle component analysis with the olive oils
-pca <- princomp(oliveoil[,3:10], cor = TRUE)
-# The first PC represent 46.5% of the variability in the original acid variables.
-pca$sdev[1]^2 / sum(pca$sdev^2)
-# Suppose I want a confidence interval for that summary statistic, how would I do it?!?
-
-set.seed(1234)
-B<- 1000
-boot_PCA_var <- rep(NA, B)
-for (b in 1:B){
-  boot_oo <- oliveoil[sample(1:nrow(oliveoil),replace=TRUE), ]
-  boot_pca <- princomp(boot_oo[,3:10], cor = TRUE)
-  boot_PCA_var[b] <- boot_pca$sdev[1]^2 / sum(boot_pca$sdev^2)
-}
-
-# central 90% bootstrap interval for the variability explained by PC1
-quantile(boot_PCA_var, c(0.05,.95))
-
-# Can you test the hypothesis that the proportion of variability explained by PC1 is at least 50%?
-mean(boot_PCA_var > .5)
 ```
 
 
