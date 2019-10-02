@@ -1,0 +1,53 @@
+---
+title: "Lesson 5 Bootstrapping"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=4"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# The Bootstrap
+
+The statistical procedure known at the bootstrap was born out of Brad Efron's work in 1979. The bootstrap is named after the hyperbolic phrase "pulling yourself up by your bootstraps" -- a physical act that would be impossible -- because the bootstrap seems to work in a somewhat unbelievable manner for accomplishing statistical inference. 
+
+We know that most of the inferencial statistics that we have seen previously have been based on knowing theoretical properties of sampling distributions, then working to align our construction of confidence intervals or test-statistics with these known distributions. This is why many of our tests focus around the used of means and proportions, because they have well known properties in large sample sizes. But how do we do inference if the behavior of the sampling distribution isn't already known?
+
+![Pair of Boots with Straps](https://upload.wikimedia.org/wikipedia/commons/3/39/Dr_Martens%2C_black%2C_old.jpg)
+
+##  Bootstrap Sampling
+
+A sampling distribution for a sample statistic is the probability structure for outcomes of the statistic in repeated sampling from the population. If we don't have theoretical properties that tell us how that will behave, our solution is simple... just sample repeatedly from the population to find out the distribution of sample statistics. Wait. That is not very practical, since we used our available resources to collect our one real dataset. 
+
+In bootstrapping, we exchange the idea of resampling from our population, and instead resample from our *sample* with replacement! A *bootstrap sample* is a random resampling of $n$ from the $n$ observations in our original sample, with replacement. The summary statistic that you calculate from a bootstrap sample, is the *bootstrap statistic*. The distribution of bootstrap statistics that you obtain by repeatly generating bootstrap samples is called the *bootstrap distribution*. The amazing thing abour the bootstrap distribution is that the shape and spread of the bootstrap distribution are surprisingly good estimate for the shape and spread of the sampling distribution for the same summary statistic. The primary difference is that instead of sampling distribution having an expected value equal to the population parameter, the bootstrap distribution has an expected value equal to the original sample statistic. 
+
+So suppose you have a summary statistic that doesn't have a known sampling distribution. How can you do inference? Generate a bunch of bootstrap samples, use these to compute the bootstrap statistics, then use the variability estimates from the bootstrap distribution as approximations to help us build intervals or p-values.
+
+```{r bootstrap_samples, warning=FALSE}
+# Lets explore what a bootstrap sample looks like:
+simple_data <- data.frame(row=1:5,value=c(7,6,9,12,11))
+simple_data
+
+```
+
+
+## Your Turn: Find alternative bootstrap to a common test. 
+
+I would like you to use bootstrapping to reproduce the following ANOVA F-test for the difference in overall mean Palmitic Acid for olive oils in different macro.areas. 
+
+```{r your_turn}
+library(pdfCluster)
+data("oliveoil")
+mod <- lm(stearic ~ macro.area, data = oliveoil)
+anova(mod)
+
+### And... Go!
+
+# if you get stuck, identify the sample statitic used in the ANOVA test, the way you can obtain bootstrap sample statistics of that quantity, then how you can evaluate the values in the bootstrap distribution to get an pvalue. 
+```
