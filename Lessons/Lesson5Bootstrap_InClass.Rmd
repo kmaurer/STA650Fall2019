@@ -34,6 +34,58 @@ So suppose you have a summary statistic that doesn't have a known sampling distr
 simple_data <- data.frame(row=1:5,value=c(7,6,9,12,11))
 simple_data
 
+simple_data[c(3,2,3,1,5),]
+
+simple_data[sample(1:5, replace=T),]
+
+library(pdfCluster)
+data(oliveoil)
+head(oliveoil)
+
+# Suppose we want to conduct PCA and evaluate the proportion of variation explained by the first principal component
+oo_pca <- princomp(oliveoil[, 3:10], cor=T)
+oo_pca$sdev[1]^2/sum(oo_pca$sdev^2)
+# what is the sampling distribution for the proportion of variation explained by the first principal component? No simple theoretical distribution to base intervals and p-values
+
+### Collect the boostrap statistics from 10000 bootstrap samples
+B <- 1000
+boot_prop_exp <- rep(NA, B)
+for (b in 1:B){
+  boot_samp <- oliveoil[sample(1:nrow(oliveoil), replace=T), ]
+  oo_pca <- princomp(boot_samp[, 3:10], cor=T)
+  boot_prop_exp[b] <- oo_pca$sdev[1]^2/sum(oo_pca$sdev^2)
+}
+
+head(boot_prop_exp)
+# Central Bootstrap Interval
+quantile(boot_prop_exp, c(.05,.5,.95))
+
+# test the hypothesis that the prop of Var explained > .5
+p_null <- 0.5
+p_observed <- mean(boot_prop_exp)
+# how far does the bootstrap distribution need to be shifted to be centered at the null hypothesize values?
+shift <- p_null-p_observed
+shift
+# Under null the values should be distributed with expected value at null proportion=0.5 and spread matching bootstrap
+null_shifted_boot_dist <- boot_prop_exp + shift
+
+# how many of the shifted bootstrap samples were as or more extreme than the observed? None. Reject Null.
+mean(null_shifted_boot_dist <= p_observed)
+
+#-------------------------------------------------
+
+### Based on Colton Question: 
+# Question - can bootstrap distribution be non-normal? Yes
+original_data <- data.frame(y=rexp(10))
+original_data
+
+boot_means <- rep(NA, B)
+for(b in 1:B){
+  boot_means[b] <- mean(original_data$y[sample(1:10,replace=T)])
+}
+
+summary(boot_means)
+hist(boot_means)
 ```
 
 
