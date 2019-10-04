@@ -1,0 +1,138 @@
+---
+title: "Lesson 6 Computational Experiments"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=4"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# Computational Experiments
+
+In the process of running analyses and working with new methods, we often encounter the situation where we don't know what the best course of action is for continuing our work. It may not be clear if our new method is really any more accurate than existing methods, or which algorithm is more efficient, or which parameterization is best. If we look to existing literature, web resources and professional advice, we might find a solution already exists; or we might learn that there is not clear answer, and we have to figure it out ourselves. What do we do then?
+
+<!-- *Example: In a standard knn regression we predict the response value for a new point by finding the k-nearest points from the training data, then calculating their average as a prediction for the new point. This is a nice non-parametric model but it requires a lot of distance calculation to find the neighbors. Suppose that a researcher named Karstino (no relation to your professor) is working on a new approximation to a k-nearest neighbor regression model. Instead of creating neighborhoods based on distance, instead the neighborhoods are defined by binning the features using quantile-based bins. The researcher thinks that this should be faster than knn, but is unsure if the predictions will be as accurate.* -->
+
+*Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
+
+```{r example_var_select, warning=FALSE, message=FALSE}
+### Libraries we will need containing the functions required
+library(tidyverse)
+library(glmnet)
+
+# setwd("C:\\Users\\maurerkt\\Documents\\Github\\STA650Fall2019\\Lessons")
+load("./data/air_quality_cleaned.Rdata")
+## pick variables using stepwise
+big_mod <- lm(y ~ . , data=data)
+# stepwise variable selection based on AIC
+step_selected <- step(big_mod)
+step_selected
+
+
+##Pick variables with LASSO
+# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
+# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
+cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+                    y=data$y, alpha=1,type.measure="deviance")
+cv.out$lambda.1se
+# use tuned lambda to pick variables
+lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
+  # lasso_mod$beta[,1]
+lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+
+# use selected variables to fit the linear model
+  # lasso_vars
+  # paste(lasso_vars, collapse = " + ")
+  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
+lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
+lasso_selected
+```
+
+
+## Preparing to experiment
+
+In experimental design, what are key features? response of interest, treatments, subjects, control, randomization, replication, reproducibility. 
+
+In the knn regression example above identify the following:
+
+1. What are the responses of interest?
+2. What are the treatments that we want to test above?
+3. What are the subjects?
+4. What do we need to control?
+5. What roll does randomization play?
+6. What do we do for replication?
+7. How do I make it all reproducible?
+
+## Organizing to support an experiment
+
+To be organize to run a computational experiment we need many components prepared. If we have a summary statistic(s) selected as our response of interest, then we need to have functions that can compute and store those values. If we have data that will act as the experimental subject, then we need to have this cleaned and accessible. If we have identified the algorithms and models that will act as our treatments, then we need functions that can implement these methods. If we have a set of possible parameter settings for an algorithm that will act as treatment factors, then we need to have those values organized into a data object that can be accessed when needed. 
+
+This is all to say, there is often a lot of preparation of data and functions that is required before we can start gathering results from computational experiments. 
+
+```{r preparing_for_exp}
+### Data Used for Testing (download zip folder from Experiments folder on Canvas) ---------
+all_reg_sets <- c("wpbc","wankara","laser","treasury","quake",
+                  "skillcraft","puma","air_quality","ccpp","casp")
+
+data_list <- list(NULL)
+all_reg_sizes <- NA
+for (i in 1:length(all_reg_sets)){
+  load(paste0("./data/",all_reg_sets[i],"_cleaned.Rdata"))
+  data_list[[i]] <- data
+  all_reg_sizes[i] <- nrow(data)
+}
+names(data_list) <- all_reg_sets
+all_reg_sizes
+
+# glimpse(data_list)
+
+### Helper functions for running the experiment with variable selection
+
+# function for choosing with stepwise and fitting a regression
+step_var_mod <- function(df){
+  step_selected <- step(lm(y ~ . , data=df), trace = FALSE)
+  return(step_selected)
+}
+step_var_mod(data_list[[1]])
+
+# function for choosing with lasso and fitting regression
+lasso_var_mod <- function(df){
+  cv.out <- cv.glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1,type.measure="deviance")
+  lasso_mod <- glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1, lambda=cv.out$lambda.1se)
+  lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+  lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=df )
+  return(lasso_selected)
+}
+lasso_var_mod(data_list[[1]])
+
+# function for finding number of variables included
+n_var <- function(lin_mod){
+  length(coef(lin_mod))-1
+}
+n_var(lasso_var_mod(data_list[[1]]))
+
+# function to bootstrap the 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
