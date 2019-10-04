@@ -20,8 +20,6 @@ In the process of running analyses and working with new methods, we often encoun
 <!-- *Example: In a standard knn regression we predict the response value for a new point by finding the k-nearest points from the training data, then calculating their average as a prediction for the new point. This is a nice non-parametric model but it requires a lot of distance calculation to find the neighbors. Suppose that a researcher named Karstino (no relation to your professor) is working on a new approximation to a k-nearest neighbor regression model. Instead of creating neighborhoods based on distance, instead the neighborhoods are defined by binning the features using quantile-based bins. The researcher thinks that this should be faster than knn, but is unsure if the predictions will be as accurate.* -->
 
 *Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
-
-```{r example_var_select, warning=FALSE, message=FALSE}
 ### Libraries we will need containing the functions required
 library(tidyverse)
 library(glmnet)
@@ -35,6 +33,8 @@ big_mod <- lm(y ~ . , data=data)
 step_selected <- step(big_mod)
 step_selected
 
+
+```{r example_var_select, warning=FALSE, message=FALSE}
 
 ##Pick variables with LASSO
 # LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
@@ -64,9 +64,21 @@ In experimental design, what are key features? response of interest, treatments,
 In the knn regression example above identify the following:
 
 1. What are the responses of interest?
+  - predictive performance (Root mean squared error)
+  - number of variables selected (proportion of total selected)
+  - variability of the coefficients
+  - timing comparison (time to select and fit model)
+  
 2. What are the treatments that we want to test above?
+  - selection algorithm (lasso vs step)
+  - parameter sets (lasso-lambda, stepwise-AIC/BIC)
+  
 3. What are the subjects?
+  - datasets (nine real datasets from the UCI repository)
+
 4. What do we need to control?
+  - predefined structure in code and design that either sets up consistant parameters or processes
+
 5. What roll does randomization play?
 6. What do we do for replication?
 7. How do I make it all reproducible?
@@ -145,7 +157,20 @@ While planning the steps above we might lose track of the general goal. Apply th
 
 ```{r running_it}
 
+run_trial <- function(selection_alg, df){
+  start_time = Sys.time()
+  tmp_mod <- selection_alg(df)
+  end_time = Sys.time()
+  return(data.frame(var_count = select_var_count(tmp_mod),
+            rmse = select_cv_rmse(tmp_mod),
+            time = difftime(end_time, start_time, units="secs")))
+}
 
+run_trial(lasso_var_mod, data_list[[1]])
+run_trial(step_var_mod, data_list[[1]])
+
+sapply(data_list, function(df) run_trial(lasso_var_mod, df))
+sapply(data_list, function(df) run_trial(step_var_mod, df))
 ```
 
 
