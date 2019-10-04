@@ -145,28 +145,6 @@ While planning the steps above we might lose track of the general goal. Apply th
 
 ```{r running_it}
 
-run_trial <- function(select_fun, df){
-  start_time = Sys.time()
-    select_mod = select_fun(df)
-  end_time = Sys.time()
-  return(data.frame(var_count = select_var_count(select_mod),
-              cv_rmse = select_cv_rmse(select_mod),
-              time = difftime(end_time, start_time,units="secs")) )
-}
-
-run_trial(lasso_var_mod, data_list[[1]])
-
-sapply(data_list, function(x) run_trial(lasso_var_mod, x))
-sapply(data_list, function(x) run_trial(step_var_mod, x))
-
-run_both <- function(df){
-  return(list(step=run_trial(step_var_mod, df),
-              lasso=run_trial(lasso_var_mod, df)))
-}
-run_both(data_list[[1]])
-
-
-
 
 
 ```
