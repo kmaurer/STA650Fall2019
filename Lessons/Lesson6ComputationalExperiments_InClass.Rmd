@@ -146,7 +146,6 @@ While planning the steps above we might lose track of the general goal. Apply th
 ```{r running_it}
 
 
-
 ```
 
 
