@@ -25,6 +25,7 @@ In the process of running analyses and working with new methods, we often encoun
 ### Libraries we will need containing the functions required
 library(tidyverse)
 library(glmnet)
+library(caret)
 
 # setwd("C:\\Users\\maurerkt\\Documents\\Github\\STA650Fall2019\\Lessons")
 load("./data/air_quality_cleaned.Rdata")
@@ -87,6 +88,8 @@ for (i in 1:length(all_reg_sets)){
   load(paste0("./data/",all_reg_sets[i],"_cleaned.Rdata"))
   data_list[[i]] <- data
   all_reg_sizes[i] <- nrow(data)
+  print(paste("vars from data",all_reg_sets[i]))
+  print(names(data))
 }
 names(data_list) <- all_reg_sets
 all_reg_sizes
@@ -102,6 +105,7 @@ step_var_mod <- function(df){
 }
 step_var_mod(data_list[[1]])
 
+
 # function for choosing with lasso and fitting regression
 lasso_var_mod <- function(df){
   cv.out <- cv.glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
@@ -109,21 +113,60 @@ lasso_var_mod <- function(df){
   lasso_mod <- glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
                       y=df$y, alpha=1, lambda=cv.out$lambda.1se)
   lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
-  lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=df )
+  lasso_selected <- lm( formula(paste0("y ~ 1 + ",paste(lasso_vars, collapse = " + "))), data=df )
   return(lasso_selected)
 }
 lasso_var_mod(data_list[[1]])
 
+
 # function for finding number of variables included
-n_var <- function(lin_mod){
+select_var_count <- function(lin_mod){
   length(coef(lin_mod))-1
 }
-n_var(lasso_var_mod(data_list[[1]]))
+select_var_count(lasso_var_mod(data_list[[1]]))
 
-# function to bootstrap the 
+
+# function for finding 10-fold cross validated RMSE
+select_cv_rmse <- function(lin_mod){
+  cv_result <- train(formula(lin_mod), 
+        data = lin_mod$model,
+        method="lm",
+        trControl=trainControl(method="cv",number=10),
+        tuneGrid=data.frame(intercept=TRUE))
+  return(cv_result$results$RMSE)
+}
+select_cv_rmse(lasso_var_mod(data_list[[1]]))
 
 ```
 
+## putting together the experiment
+
+While planning the steps above we might lose track of the general goal. Apply the treatments to the subjects and record the outcomes. 
+
+```{r running_it}
+
+run_trial <- function(select_fun, df){
+  start_time = Sys.time()
+    select_mod = select_fun(df)
+  end_time = Sys.time()
+  return(list(var_count = select_var_count(select_mod),
+              cv_rmse = select_cv_rmse(select_mod),
+              time = difftime(start_time,end_time, units="secs")) )
+}
+
+run_trial(lasso_var_mod, data_list[[1]])
+
+run_both <- function(df){
+  return(list(step=run_trial(step_var_mod, df),
+              lasso=run_trial(lasso_var_mod, df)))
+}
+run_both(data_list[[1]])
+
+
+
+
+
+```
 
 
 
