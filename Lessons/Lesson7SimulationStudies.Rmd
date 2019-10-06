@@ -91,6 +91,35 @@ How might we choose to simulate data to conduct the experiments for the variable
 
 ## Simulating data for your experiment
 
+When we are building our simulation study, we need to decide on how the data is generated, how we make the process reproducible and if we need to store the simulated datasets to allow for future audit. 
+
+```{r simdata}
+### create a function that will simulate the x-values for our regression variable selection study. 
+# Let Y = X'beta + rnorm(0,sigma)
+
+# n = number of simulated rows
+# p = number of simulated covariates (X)
+# q = number of covariates linearly related to Y
+# b = strength of beta coefficients for linearly related X's
+# sd_y = sd of simulated y values
+# sd_x = sd of simulated x variables
+make_sim_data <- function(n=100, p=20, q=10, b=0.1, sd_y=1, sd_x=1){
+  X <- sapply(1:p, function(i) rnorm(n, 0, sd=sd_x))
+  colnames(X) <- paste0("x",1:p)
+  beta = c(rep(b, q), rep(0, p-q))
+  y = (X %*% beta)[,1] + rnorm(n,0, sd_y)
+  sim_data <- data.frame(y,X)
+  return(sim_data)
+}
+
+set.seed(12345)
+make_sim_data(n=10, p=2, q=2, b=0.1, sd_y=1, sd_x=1)
+
+
+
+
+```
+
 
 ## Running the simulation study
 
