@@ -7,7 +7,7 @@ output:
     number_sections: true
     pandoc_args: [
       "--number-sections",
-      "--number-offset=4"
+      "--number-offset=6"
       ]
 editor_options: 
   chunk_output_type: console
@@ -15,7 +15,7 @@ editor_options:
 
 # Computational Experiments with Simulated Data
 
-In Lesson 6 we discussed running computational experiments with empirical datasets as the experimental units in our treatment comparisons. What advantages might there be in running the experiments with simulated data as the experimental units?
+In Lesson 6 we discussed running computational experiments with empirical datasets as the experimental units in our treatment comparisons. What advantages might there be in running the experiments with simulated data as the experimental units? Let's consider this idea within the contruct of our experiments on variable selection between stepwise and lasso methods.
 
 *Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
 ```{r example_var_select, warning=FALSE, message=FALSE}
@@ -29,7 +29,7 @@ load("./data/air_quality_cleaned.Rdata")
 ## pick variables using stepwise
 big_mod <- lm(y ~ . , data=data)
 # stepwise variable selection based on AIC
-step_selected <- step(big_mod)
+step_selected <- step(big_mod, trace=FALSE)
 step_selected
 
 
@@ -53,35 +53,10 @@ lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))
 lasso_selected
 ```
 
-
-```{r example_var_select, warning=FALSE, message=FALSE}
-
-##Pick variables with LASSO
-# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
-# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
-cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
-                    y=data$y, alpha=1,type.measure="deviance")
-cv.out$lambda.1se
-# use tuned lambda to pick variables
-lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
-       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
-  # lasso_mod$beta[,1]
-lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
-
-# use selected variables to fit the linear model
-  # lasso_vars
-  # paste(lasso_vars, collapse = " + ")
-  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
-lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
-lasso_selected
-```
-
-
 ## Preparing to experiment
 
 In experimental design, what are key features? response of interest, treatments, subjects, control, randomization, replication, reproducibility. 
-
-In the knn regression example above identify the following:
+In the variable selection example above identify the following:
 
 1. What are the responses of interest?
   - predictive performance (Root mean squared error)
@@ -103,12 +78,59 @@ In the knn regression example above identify the following:
 6. What do we do for replication?
 7. How do I make it all reproducible?
 
-## Organizing to support an experiment
+## Why choose simulated vs. real datasets for experiments?
+
+Advantages of real data:
+  
+
+Advantages of simulated data:
 
 
+How might we choose to simulate data to conduct the experiments for the variable selection above?
 
 
+## Simulating data for your experiment
 
+
+## Running the simulation study
+
+Still need the helper functions that we used in Lesson 6
+
+```{r exp_helpers}
+### Helper functions for running the experiment with variable selection
+
+# function for choosing with stepwise and fitting a regression
+step_var_mod <- function(df){
+  step_selected <- step(lm(y ~ . , data=df), trace = FALSE)
+  return(step_selected)
+}
+
+# function for choosing with lasso and fitting regression
+lasso_var_mod <- function(df){
+  cv.out <- cv.glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1,type.measure="deviance")
+  lasso_mod <- glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1, lambda=cv.out$lambda.1se)
+  lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+  lasso_selected <- lm( formula(paste0("y ~ 1 + ",paste(lasso_vars, collapse = " + "))), data=df )
+  return(lasso_selected)
+}
+
+# function for finding number of variables included
+select_var_count <- function(lin_mod){
+  length(coef(lin_mod))-1
+}
+
+# function for finding 10-fold cross validated RMSE
+select_cv_rmse <- function(lin_mod){
+  cv_result <- train(formula(lin_mod), 
+        data = lin_mod$model,
+        method="lm",
+        trControl=trainControl(method="cv",number=10),
+        tuneGrid=data.frame(intercept=TRUE))
+  return(cv_result$results$RMSE)
+}
+```
 
 
 

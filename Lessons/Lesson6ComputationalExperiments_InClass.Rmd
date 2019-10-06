@@ -7,7 +7,7 @@ output:
     number_sections: true
     pandoc_args: [
       "--number-sections",
-      "--number-offset=4"
+      "--number-offset=5"
       ]
 editor_options: 
   chunk_output_type: console
@@ -55,37 +55,11 @@ lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))
 lasso_selected
 ```
 
-
-
-
-```{r example_var_select, warning=FALSE, message=FALSE}
-
-##Pick variables with LASSO
-# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
-# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
-cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
-                    y=data$y, alpha=1,type.measure="deviance")
-cv.out$lambda.1se
-# use tuned lambda to pick variables
-lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
-       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
-  # lasso_mod$beta[,1]
-lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
-
-# use selected variables to fit the linear model
-  # lasso_vars
-  # paste(lasso_vars, collapse = " + ")
-  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
-lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
-lasso_selected
-```
-
-
 ## Preparing to experiment
 
 In experimental design, what are key features? response of interest, treatments, subjects, control, randomization, replication, reproducibility. 
 
-In the knn regression example above identify the following:
+In the variable selection example above identify the following:
 
 1. What are the responses of interest?
   - predictive performance (Root mean squared error)
