@@ -17,9 +17,10 @@ editor_options:
 
 In the process of running analyses and working with new methods, we often encounter the situation where we don't know what the best course of action is for continuing our work. It may not be clear if our new method is really any more accurate than existing methods, or which algorithm is more efficient, or which parameterization is best. If we look to existing literature, web resources and professional advice, we might find a solution already exists; or we might learn that there is not clear answer, and we have to figure it out ourselves. What do we do then?
 
-<!-- *Example: In a standard knn regression we predict the response value for a new point by finding the k-nearest points from the training data, then calculating their average as a prediction for the new point. This is a nice non-parametric model but it requires a lot of distance calculation to find the neighbors. Suppose that a researcher named Karstino (no relation to your professor) is working on a new approximation to a k-nearest neighbor regression model. Instead of creating neighborhoods based on distance, instead the neighborhoods are defined by binning the features using quantile-based bins. The researcher thinks that this should be faster than knn, but is unsure if the predictions will be as accurate.* -->
 
 *Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
+
+```{r example_var_select, warning=FALSE, message=FALSE}
 ### Libraries we will need containing the functions required
 library(tidyverse)
 library(glmnet)
@@ -32,6 +33,29 @@ big_mod <- lm(y ~ . , data=data)
 # stepwise variable selection based on AIC
 step_selected <- step(big_mod)
 step_selected
+
+
+##Pick variables with LASSO
+# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
+# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
+cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+                    y=data$y, alpha=1,type.measure="deviance")
+cv.out$lambda.1se
+# use tuned lambda to pick variables
+lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
+  # lasso_mod$beta[,1]
+lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+
+# use selected variables to fit the linear model
+  # lasso_vars
+  # paste(lasso_vars, collapse = " + ")
+  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
+lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
+lasso_selected
+```
+
+
 
 
 ```{r example_var_select, warning=FALSE, message=FALSE}

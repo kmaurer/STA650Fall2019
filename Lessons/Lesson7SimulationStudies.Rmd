@@ -1,0 +1,118 @@
+---
+title: "Lesson 7 Simulation Studies"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=4"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# Computational Experiments with Simulated Data
+
+In Lesson 6 we discussed running computational experiments with empirical datasets as the experimental units in our treatment comparisons. What advantages might there be in running the experiments with simulated data as the experimental units?
+
+*Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
+```{r example_var_select, warning=FALSE, message=FALSE}
+### Libraries we will need containing the functions required
+library(tidyverse)
+library(glmnet)
+library(caret)
+
+# setwd("C:\\Users\\maurerkt\\Documents\\Github\\STA650Fall2019\\Lessons")
+load("./data/air_quality_cleaned.Rdata")
+## pick variables using stepwise
+big_mod <- lm(y ~ . , data=data)
+# stepwise variable selection based on AIC
+step_selected <- step(big_mod)
+step_selected
+
+
+##Pick variables with LASSO
+# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
+# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
+cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+                    y=data$y, alpha=1,type.measure="deviance")
+cv.out$lambda.1se
+# use tuned lambda to pick variables
+lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
+  # lasso_mod$beta[,1]
+lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+
+# use selected variables to fit the linear model
+  # lasso_vars
+  # paste(lasso_vars, collapse = " + ")
+  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
+lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
+lasso_selected
+```
+
+
+```{r example_var_select, warning=FALSE, message=FALSE}
+
+##Pick variables with LASSO
+# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
+# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
+cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+                    y=data$y, alpha=1,type.measure="deviance")
+cv.out$lambda.1se
+# use tuned lambda to pick variables
+lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
+  # lasso_mod$beta[,1]
+lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+
+# use selected variables to fit the linear model
+  # lasso_vars
+  # paste(lasso_vars, collapse = " + ")
+  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
+lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
+lasso_selected
+```
+
+
+## Preparing to experiment
+
+In experimental design, what are key features? response of interest, treatments, subjects, control, randomization, replication, reproducibility. 
+
+In the knn regression example above identify the following:
+
+1. What are the responses of interest?
+  - predictive performance (Root mean squared error)
+  - number of variables selected (proportion of total selected)
+  - variability of the coefficients
+  - timing comparison (time to select and fit model)
+  
+2. What are the treatments that we want to test above?
+  - selection algorithm (lasso vs step)
+  - parameter sets (lasso-lambda, stepwise-AIC/BIC)
+  
+3. What are the subjects?
+  - datasets (nine real datasets from the UCI repository)
+
+4. What do we need to control?
+  - predefined structure in code and design that either sets up consistant parameters or processes
+
+5. What roll does randomization play?
+6. What do we do for replication?
+7. How do I make it all reproducible?
+
+## Organizing to support an experiment
+
+
+
+
+
+
+
+
+
+
+
+
