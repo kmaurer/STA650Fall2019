@@ -115,9 +115,6 @@ make_sim_data <- function(n=100, p=20, q=10, b=0.1, sd_y=1, sd_x=1){
 set.seed(12345)
 make_sim_data(n=10, p=2, q=2, b=0.1, sd_y=1, sd_x=1)
 
-
-
-
 ```
 
 
@@ -141,6 +138,7 @@ lasso_var_mod <- function(df){
   lasso_mod <- glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
                       y=df$y, alpha=1, lambda=cv.out$lambda.1se)
   lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+  if (length(lasso_vars) == 0) lasso_vars <- names(lasso_mod$beta[,1])[1]
   lasso_selected <- lm( formula(paste0("y ~ 1 + ",paste(lasso_vars, collapse = " + "))), data=df )
   return(lasso_selected)
 }
@@ -159,8 +157,74 @@ select_cv_rmse <- function(lin_mod){
         tuneGrid=data.frame(intercept=TRUE))
   return(cv_result$results$RMSE)
 }
+
+run_trial <- function(selection_alg, df){
+  start_time = Sys.time()
+  tmp_mod <- selection_alg(df)
+  end_time = Sys.time()
+  return(data.frame(var_count = select_var_count(tmp_mod),
+            rmse = select_cv_rmse(tmp_mod),
+            time = difftime(end_time, start_time, units="secs")))
+}
 ```
 
+
+### Timing Study 
+
+```{r timing_study, cache=TRUE}
+### Code Timing helper package
+library(tictoc)
+# help(package="tictoc")
+
+## Demo tictoc
+tic.clearlog()
+for(i in 1:3){
+  tic(paste0("sim",i))
+  sim_data <- make_sim_data(n=50000, p=10,q=5)
+  run_trial(lasso_var_mod, sim_data)
+  toc(log=TRUE, quiet=TRUE)
+}
+log.lst <- tic.log(format = FALSE)
+timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
+timings
+
+## make into a function of n_sims, n, p and q
+timing_trials <- function(n_sims=10, n=1000, p=10, q=5, selection_alg=lasso_var_mod){
+  tic.clearlog()
+    for(i in 1:n_sims){
+      tic(paste0("sim",i))
+      sim_data <- make_sim_data(n=n, p=p,q=q)
+      run_trial(selection_alg, sim_data)
+      toc(log=TRUE, quiet=TRUE)
+    }
+  log.lst <- tic.log(format = FALSE)
+  timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
+  return(timings)
+}
+
+timing_trials(n_sims=10, n=1000, p=20, q=5, selection_alg=lasso_var_mod)
+timing_trials(n_sims=10, n=1000, p=20, q=5, selection_alg=step_var_mod)
+
+# Possible parameter combinations
+params <- expand.grid(n=c(100,1000),
+                      p=c(25,50),
+                      q=c(5,10))
+params
+
+lasso_timing_results <- mapply(timing_trials,
+                               n=params$n, p=params$p, q=params$q,
+                               MoreArgs = list(n_sims=5,
+                                               selection_alg=lasso_var_mod),
+                               SIMPLIFY=TRUE)
+lasso_timing_results
+
+step_timing_results <-  mapply(timing_trials,
+                               n=params$n, p=params$p, q=params$q,
+                               MoreArgs = list(n_sims=5,
+                                               selection_alg=step_var_mod),
+                               SIMPLIFY=TRUE)
+step_timing_results
+```
 
 
 
