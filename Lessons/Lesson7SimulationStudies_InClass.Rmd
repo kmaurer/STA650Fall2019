@@ -81,10 +81,11 @@ In the variable selection example above identify the following:
 ## Why choose simulated vs. real datasets for experiments?
 
 Advantages of real data:
-  
+  - predictive accuracy is measured more realistically
 
 Advantages of simulated data:
-
+  - I can control the "True" parameters the create the data
+  - I can control sample sizes
 
 How might we choose to simulate data to conduct the experiments for the variable selection above?
 
@@ -179,9 +180,9 @@ library(tictoc)
 ## Demonstrate tictoc timers
 tic.clearlog()
 for(i in 1:3){
-  tic(paste0("sim",i))
   sim_data <- make_sim_data(n=50000, p=10,q=5)
-  run_trial(lasso_var_mod, sim_data)
+  tic(paste0("sim",i))
+  run_trial(step_var_mod, sim_data)
   toc(log=TRUE, quiet=TRUE)
 }
 log.lst <- tic.log(format = FALSE)
@@ -189,16 +190,56 @@ timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
 timings
 
 ## make into a function of n_sims, n, p and q
-
+sim_times <- function(n_sim=10, n=100, p=10, q=5, var_select_ftn=step_var_mod){
+  tic.clearlog()
+  for(i in 1:n_sim){
+    sim_data <- make_sim_data(n=n, p=p,q=q)
+    tic(paste0("sim",i))
+    run_trial(var_select_ftn, sim_data)
+    toc(log=TRUE, quiet=TRUE)
+  }
+  log.lst <- tic.log(format = FALSE)
+  timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
+  return(timings)
+}
+sim_times(3, 500, 10, 5, var_select_ftn=step_var_mod)
 
 ## Possible parameter combinations
+params <- expand.grid(n=c(100,1000,5000), p=c(20,30), q=c(5,10))
 
+step_times <- mapply(sim_times, n=params$n, p=params$p, q=params$q,
+       MoreArgs = list(n_sim=3,var_select_ftn=step_var_mod ))
+step_times
 
+params$time_mean <- apply(step_times, 2, mean)
+params
 
 ```
 
+### Number of variables selected with simulation study
+
+```{r sim_var_pick}
+## make into a function of n_sims, n, p and q that collects number of variables selected
+sim_var_select <- function(n_sim=10, n=100, p=10, q=5, var_select_ftn=step_var_mod){
+  n_pick <- rep(NA, n_sim)
+  for(i in 1:n_sim){
+    sim_data <- make_sim_data(n=n, p=p,q=q)
+     n_pick[i] <- run_trial(var_select_ftn, sim_data)$var_count
+  }
+  return(n_pick)
+}
+sim_var_select(3, 500, 10, 5, var_select_ftn=step_var_mod)
 
 
+step_var_counts <- mapply(sim_var_select, n=params$n, p=params$p, q=params$q,
+       MoreArgs = list(n_sim=3,var_select_ftn=step_var_mod ))
+step_var_counts
+
+
+params$var_count_mean <- apply(step_var_counts, 2, mean)
+params
+
+```
 
 
 
