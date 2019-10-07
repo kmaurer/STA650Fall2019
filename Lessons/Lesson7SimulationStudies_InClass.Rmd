@@ -1,0 +1,204 @@
+---
+title: "Lesson 7 Simulation Studies"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=6"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# Computational Experiments with Simulated Data
+
+In Lesson 6 we discussed running computational experiments with empirical datasets as the experimental units in our treatment comparisons. What advantages might there be in running the experiments with simulated data as the experimental units? Let's consider this idea within the contruct of our experiments on variable selection between stepwise and lasso methods.
+
+*Example: You have heard of stepwise variable selection for regression. Suppose you also learn the LASSO regression can also be used to run variable selection. Which will lead to smaller models? Which is faster? Which make a model that is better for predictive accuracy? *
+```{r example_var_select, warning=FALSE, message=FALSE}
+### Libraries we will need containing the functions required
+library(tidyverse)
+library(glmnet)
+library(caret)
+
+# setwd("C:\\Users\\maurerkt\\Documents\\Github\\STA650Fall2019\\Lessons")
+load("./data/air_quality_cleaned.Rdata")
+## pick variables using stepwise
+big_mod <- lm(y ~ . , data=data)
+# stepwise variable selection based on AIC
+step_selected <- step(big_mod, trace=FALSE)
+step_selected
+
+
+##Pick variables with LASSO
+# LASSO variable selection is based on shrinkage penalty (controlled by lambda parameter)
+# Pick lambda based on a cross validated tuning process (take STA 567 for more detail)
+cv.out <- cv.glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+                    y=data$y, alpha=1,type.measure="deviance")
+cv.out$lambda.1se
+# use tuned lambda to pick variables
+lasso_mod <- glmnet(x= as.matrix(x=data[,-which(names(data)=="y")]),
+       y=data$y, alpha=1, lambda=cv.out$lambda.1se)
+  # lasso_mod$beta[,1]
+lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+
+# use selected variables to fit the linear model
+  # lasso_vars
+  # paste(lasso_vars, collapse = " + ")
+  # paste0("y ~ ",paste(lasso_vars, collapse = " + "))
+lasso_selected <- lm( formula(paste0("y ~ ",paste(lasso_vars, collapse = " + "))), data=data )
+lasso_selected
+```
+
+## Preparing to experiment
+
+In experimental design, what are key features? response of interest, treatments, subjects, control, randomization, replication, reproducibility. 
+In the variable selection example above identify the following:
+
+1. What are the responses of interest?
+  - predictive performance (Root mean squared error)
+  - number of variables selected (proportion of total selected)
+  - variability of the coefficients
+  - timing comparison (time to select and fit model)
+  
+2. What are the treatments that we want to test above?
+  - selection algorithm (lasso vs step)
+  - parameter sets (lasso-lambda, stepwise-AIC/BIC)
+  
+3. What are the subjects?
+  - datasets (nine real datasets from the UCI repository)
+
+4. What do we need to control?
+  - predefined structure in code and design that either sets up consistant parameters or processes
+
+5. What roll does randomization play?
+6. What do we do for replication?
+7. How do I make it all reproducible?
+
+## Why choose simulated vs. real datasets for experiments?
+
+Advantages of real data:
+  
+
+Advantages of simulated data:
+
+
+How might we choose to simulate data to conduct the experiments for the variable selection above?
+
+
+## Simulating data for your experiment
+
+When we are building our simulation study, we need to decide on how the data is generated, how we make the process reproducible and if we need to store the simulated datasets to allow for future audit. 
+
+```{r simdata}
+### create a function that will simulate the x-values for our regression variable selection study. 
+# Let Y = X'beta + rnorm(0,sigma)
+
+# n = number of simulated rows
+# p = number of simulated covariates (X)
+# q = number of covariates linearly related to Y
+# b = strength of beta coefficients for linearly related X's
+# sd_y = sd of simulated y values
+# sd_x = sd of simulated x variables
+make_sim_data <- function(n=100, p=20, q=10, b=0.1, sd_y=1, sd_x=1){
+  X <- sapply(1:p, function(i) rnorm(n, 0, sd=sd_x))
+  colnames(X) <- paste0("x",1:p)
+  beta = c(rep(b, q), rep(0, p-q))
+  y = (X %*% beta)[,1] + rnorm(n,0, sd_y)
+  sim_data <- data.frame(y,X)
+  return(sim_data)
+}
+
+set.seed(12345)
+make_sim_data(n=10, p=2, q=2, b=0.1, sd_y=1, sd_x=1)
+
+```
+
+
+## Running the simulation study
+
+Still need the helper functions that we used in Lesson 6
+
+```{r exp_helpers}
+### Helper functions for running the experiment with variable selection
+
+# function for choosing with stepwise and fitting a regression
+step_var_mod <- function(df){
+  step_selected <- step(lm(y ~ . , data=df), trace = FALSE)
+  return(step_selected)
+}
+
+# function for choosing with lasso and fitting regression
+lasso_var_mod <- function(df){
+  cv.out <- cv.glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1,type.measure="deviance")
+  lasso_mod <- glmnet(x= as.matrix(x=df[,-which(names(df)=="y")]),
+                      y=df$y, alpha=1, lambda=cv.out$lambda.1se)
+  lasso_vars <- names(lasso_mod$beta[,1])[which(lasso_mod$beta[,1] != 0)]
+  if (length(lasso_vars) == 0) lasso_vars <- names(lasso_mod$beta[,1])[1]
+  lasso_selected <- lm( formula(paste0("y ~ 1 + ",paste(lasso_vars, collapse = " + "))), data=df )
+  return(lasso_selected)
+}
+
+# function for finding number of variables included
+select_var_count <- function(lin_mod){
+  length(coef(lin_mod))-1
+}
+
+# function for finding 10-fold cross validated RMSE
+select_cv_rmse <- function(lin_mod){
+  cv_result <- train(formula(lin_mod), 
+        data = lin_mod$model,
+        method="lm",
+        trControl=trainControl(method="cv",number=10),
+        tuneGrid=data.frame(intercept=TRUE))
+  return(cv_result$results$RMSE)
+}
+
+run_trial <- function(selection_alg, df){
+  start_time = Sys.time()
+  tmp_mod <- selection_alg(df)
+  end_time = Sys.time()
+  return(data.frame(var_count = select_var_count(tmp_mod),
+            rmse = select_cv_rmse(tmp_mod),
+            time = difftime(end_time, start_time, units="secs")))
+}
+```
+
+
+### Timing Study 
+
+```{r timing_study, cache=TRUE}
+### Code Timing helper package
+library(tictoc)
+# help(package="tictoc")
+
+## Demonstrate tictoc timers
+tic.clearlog()
+for(i in 1:3){
+  tic(paste0("sim",i))
+  sim_data <- make_sim_data(n=50000, p=10,q=5)
+  run_trial(lasso_var_mod, sim_data)
+  toc(log=TRUE, quiet=TRUE)
+}
+log.lst <- tic.log(format = FALSE)
+timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
+timings
+
+## make into a function of n_sims, n, p and q
+
+
+## Possible parameter combinations
+
+
+
+```
+
+
+
+
+
+
