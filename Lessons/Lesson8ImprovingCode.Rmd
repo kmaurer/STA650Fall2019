@@ -1,0 +1,75 @@
+---
+title: "Lesson 8 Improving Code"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=7"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r example_var_select, warning=FALSE, message=FALSE}
+### Libraries we will need containing the functions required
+library(tidyverse)
+library(glmnet)
+library(caret)
+library(tictoc)
+library(parallel)
+# install_github('nathanvan/parallelsugar')
+library(parallelsugar)
+
+# Storing your modular functions used for computation in dedicated file(s)
+source("SimStudyHelperFunctions.R")
+```
+
+
+```{r running simulations on timing}
+## Possible parameter combinations
+params <- expand.grid(n=c(50,100,200), p=c(20,25,30), q=c(5,10))
+
+tic()
+sim_results <- lapply(1:nrow(params), function(i){
+        sim_var_select(n=params$n[i], p=params$p[i], q=params$q[i],
+                       n_sim=3,var_select_ftn=step_var_mod )
+       })
+toc()
+
+### Parallel Processing: 
+## parallel package by Luke Tierney
+# easy with lapply and mapply --> mclapply and mcmapply on Mac and Linux
+# Hard on Windows which want to use seriel processing 
+## parallelsugar package by Nathan VanHoudnos gives windows hacked version
+
+tic()
+sim_results2 <- parallelsugar::mclapply(1:nrow(params), function(i){
+  sim_var_select(n=params$n[i], p=params$p[i], q=params$q[i],
+                 n_sim=3,var_select_ftn=step_var_mod)
+})
+toc()
+```
+
+
+```{r}
+? utils::Rprof
+# sim_dat <- make_sim_data(n=100, p=10, q=5)
+# my_mod <- step_var_mod(sim_dat)
+# select_var_count(my_mod)
+select_cv_rmse(my_mod)
+
+### Profiling code with Rprof utility function
+utils::Rprof(tmp <- tempfile())
+sim_var_select(n_sim=10, n=100, p=10, q=5, var_select_ftn=step_var_mod)
+Rprof()
+summaryRprof(tmp)
+unlink(tmp)
+
+```
+
+
+
+
