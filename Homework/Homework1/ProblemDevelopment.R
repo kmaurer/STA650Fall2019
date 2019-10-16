@@ -45,6 +45,10 @@ gam_means <- function(gam_array){
   apply(gam_array, MARGIN=c(2,3), FUN=mean)
 }
 
+ci_helper <- function(vector){
+  t.test(vector)$conf.int[1:2]
+}
+
 gam_CIs <- function(gam_array){
   apply(gam_array, MARGIN=c(2,3), FUN=ci_helper)
 }
@@ -58,5 +62,5 @@ gam_sim_means <- lapply(gam_arrays_list, gam_means)
 gam_sim_means
 
 ### Apply your gam_CIs() function to the list of arrays called "gam_arrays_list". Store the results as list of CI arrays
-gam_sim_CIs <- lapply(gam_arrays_list, gam_means)
-gam_sim_CIs
+gam_sim_CIs <- lapply(gam_arrays_list, gam_CIs)
+gam_sim_CIs[[6]]

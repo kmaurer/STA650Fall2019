@@ -1,8 +1,20 @@
-## File full of function for running variable selection 
-# method experiments and sim study. 
-#----------------------------------------------------------------
-
 # function for simulating data of different sizes...
+
+#' Data simulation function for computational experiments on variable selection methods
+#'
+#' @param n an integer for the number of rows of data to simulate
+#' @param p the number of input variables to simulate
+#' @param q the number of input variables to linearly relate to response
+#' @param b the magnitude of the linear relationships between inputs and response
+#' @param sd_y sd for error around the mean for the response  
+#' @param sd_x sd for the simulated input variables
+#'
+#' @return a (n) by (p+1) data frame with columns y, x1, x2,... xP
+#' @export
+#'
+#' @examples
+#' 
+#' make_sim_data(n=6, p=3, q=1)
 make_sim_data <- function(n=100, p=20, q=10, b=0.1, sd_y=1, sd_x=1){
   X <- sapply(1:p, function(i) rnorm(n, 0, sd=sd_x))
   colnames(X) <- paste0("x",1:p)

@@ -1,0 +1,75 @@
+---
+title: "Lesson 10 Parting Thoughts on Computing ... and Other Stuff"
+author: "Karsten Maurer"
+date: "9/27/2019"
+output: 
+  html_document:
+    number_sections: true
+    pandoc_args: [
+      "--number-sections",
+      "--number-offset=9"
+      ]
+editor_options: 
+  chunk_output_type: console
+---
+
+# Statistical Computing
+
+With an ever growing computational role in statistical work, programming skills are necessary for long term viability in the fields of data science and statistics. 
+
+Undeniably scary facts about programming and computation:
+
+- It is hard to learn to write properly working code
+- It is *really* hard to learn to write code that works well, is readable, well documented and efficient. 
+- Open source tools constantly appear and evolve
+- There is always more to learn
+
+Undeniable benefits of programming and computation: 
+
+- Well written code gets you answers to hard and important question. 
+- Code that is readable, well documented and efficient provides evidence and garners faith in your answers
+- Open source software is expanding and evolving to develope the tools that people want and need... for free
+- Contributing as a developer of an open source community helps you to empower others to find answers to hard and important questions
+- There is always more to learn
+
+## Recap on Unit 2
+
+We have scratched the surface on statistical computing, but hopefully revealed some of the potential avenues for future exploration and growth in your graduate research and in your careers. 
+
+### Programming beyond the basics
+
+To accomplish harder computational tasks we have a choice: Fight to use the same simple tools we learned long ago in applications they are poorly suited to handle -or- learn to use more sophisticated tools that are designed to handle more complicated tasks. We explored a few of the more complex and sophisticated tools for working with R in an advanced way: 
+
+- Data Objects: lists and arrays
+- Functions: structure, construction, modularization, packages
+- Functional applications: apply family functions, parallelization
+- Profiling: evaluating where major efficiency gains can be made
+
+### Non-parametric methods
+
+We also explored some computationally intensive procedures that provide alternatives to methods that rely on distributional assumptions and statistical theory. Many of these methods rely on using computation to repeatedly conduct either randomizations, permutations or simulations. 
+
+- permutation test: evaluating group differences throught permuations on group labels, both with exact and Monte Carlo simulated permutations
+- bootstrapping: generating estimates for sampling uncertainty through repeated sampling with replacement
+- simulation studies: evaluating the behavior of statistical methods and models by running them in scenarios where you control the generative structure of the sample data.
+
+### Other Periferal Topics
+
+Along the way I have discussed a number of somewhat related topics to doing computational work in R. 
+
+- Version control: Git
+- Collaborating and/or Publicly Sharing your work: Github
+- Developer's Toolkit: devtools, roxygen2, usethis, packagedown, testthat... this area is currently growing fast
+
+## Karsten's two-cents
+
+Assuming that you plan to continue on into a computationally demanding job in either data science or statistics, there is still a lot to learn. My suggestions for additional skills and topics that you may need to learn more about: 
+
+- Technical communication tools: markdown, blogdown, packagedown, xaringan, ggplot2, plotly, shiny.
+- Soft communication skills: storytelling, connecting with an audience, delivering insights in context
+- Data management skills: working with databases and SQL. R can connect with these through packages like RMySQL and dplyr. 
+- Programming languages: R is popular with statisticians, python is popular with seemingly everyone else
+
+
+
+
