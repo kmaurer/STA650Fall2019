@@ -67,6 +67,8 @@ Assuming that you plan to continue on into a computationally demanding job in ei
 
 - Technical communication tools: markdown, blogdown, packagedown, xaringan, ggplot2, plotly, shiny.
 - Soft communication skills: storytelling, connecting with an audience, delivering insights in context
+- Calls from R to other languages for faster processing: Rcpp
+- Web scrapping data: rvest, XML
 - Data management skills: working with databases and SQL. R can connect with these through packages like RMySQL and dplyr. 
 - Programming languages: R is popular with statisticians, python is popular with seemingly everyone else
 
